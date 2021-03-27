@@ -3,18 +3,21 @@ import * as React from 'react';
 import { View, Text, StyleSheet, Image, TouchableHighlight } from 'react-native';
 import { Card, Title, Paragraph } from 'react-native-paper';
 
-const FoodCard = ({ name, recipes, navigate }) => {
+const FoodCard = ({ id, name, recipes, navigate, img }) => {
     return (
-        <TouchableHighlight onPress={() => navigate('Edit')}>
+        <TouchableHighlight style={styles.touchable} onPress={() => navigate('Edit', {
+            foodID: id,
+            name: name
+        })}>
             <Card style={styles.card}>
                 <View styles={styles.cardContent}>
                     <Image
                         style={styles.cardImage}
-                        source={require('../resource/food1.png')}
-                        defaultSource={require('../resource/default.png')}
+                        source={require('../resource/default.png')}
                     />
                     <View style={styles.cardText}>
                         <Text style={styles.title}>{name}</Text>
+                        <Text style={styles.subtitle}>{recipes}</Text>
                     </View>
                 </View>
             </Card>
@@ -23,6 +26,9 @@ const FoodCard = ({ name, recipes, navigate }) => {
 };
 
 const styles = StyleSheet.create({
+    touchable: {
+        margin: 5
+    },
     card: {
         backgroundColor: '#ffaa42',
     },
@@ -38,6 +44,9 @@ const styles = StyleSheet.create({
         color: 'white',
         fontWeight: 'bold'
     },
+    subtitle: {
+        color: 'white',
+    }
 });
 
 export default FoodCard;

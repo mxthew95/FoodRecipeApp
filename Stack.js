@@ -2,7 +2,8 @@ import * as React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import HomeScreen from './screens/HomeScreen';
 import EditScreen from './screens/EditScreen';
-import { forHorizontalIOS } from '@react-navigation/stack/lib/typescript/src/TransitionConfigs/CardStyleInterpolators';
+import AddScreen from './screens/AddScreen';
+
 const Stack = createStackNavigator();
 
 export default function Navigator() {
@@ -18,15 +19,26 @@ export default function Navigator() {
                     fontSize: 24
                 },
             }}
-            >
+        >
             <Stack.Screen
                 name="Home"
                 component={HomeScreen}
                 options={{
-                    title: 'Your Recipes',  
+                    title: 'Your Recipes',
                 }}
             />
-            <Stack.Screen name="Edit" component={EditScreen} />
+            <Stack.Screen
+                name="Edit"
+                component={EditScreen}
+                options={({ route }) => ({ title: route.params.name })}
+            />
+            <Stack.Screen
+                name="Add"
+                component={AddScreen}
+                options={{
+                    title: 'Add A Recipe',
+                }}
+            />
         </Stack.Navigator>
     )
 }
