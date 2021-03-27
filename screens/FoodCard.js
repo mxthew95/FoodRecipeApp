@@ -1,24 +1,31 @@
 
 import * as React from 'react';
-import { View, Text, StyleSheet, Image, TouchableHighlight } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableHighlight, ScrollView } from 'react-native';
 import { Card, Title, Paragraph } from 'react-native-paper';
 
 const FoodCard = ({ id, name, recipes, navigate, img }) => {
+    const maxRecipeChar = 5;
+    const recipesInLine = recipes.split('\n').join(',');
+    const recipesToDisplay =  recipesInLine.length > maxRecipeChar ? recipesInLine.substring(0,maxRecipeChar)+'...' : recipesInLine;
+
     return (
         <TouchableHighlight style={styles.touchable} onPress={() => navigate('Edit', {
             foodID: id,
             name: name
         })}>
-            <Card style={styles.card}>
+            <Card>
                 <View styles={styles.cardContent}>
                     <Image
                         style={styles.cardImage}
                         source={require('../resource/default.png')}
                     />
-                    <View style={styles.cardText}>
+                    <View style={styles.cardTitle}>
                         <Text style={styles.title}>{name}</Text>
-                        <Text style={styles.subtitle}>{recipes}</Text>
                     </View>
+                    <View style={styles.cardSubtitle }>
+                        <Text style={styles.subtitle}>{recipesToDisplay}</Text>
+                    </View>
+
                 </View>
             </Card>
         </TouchableHighlight>
@@ -27,17 +34,19 @@ const FoodCard = ({ id, name, recipes, navigate, img }) => {
 
 const styles = StyleSheet.create({
     touchable: {
-        margin: 5
-    },
-    card: {
-        backgroundColor: '#ffaa42',
+        margin: 5,
     },
     cardImage: {
         width: 150,
         height: 100
     },
-    cardText: {
-        padding: 5
+    cardTitle: {
+        padding: 5,
+        backgroundColor: '#ffaa42',
+    },
+    cardSubtitle: {
+        padding: 5,
+        backgroundColor: '#dedede',
     },
     title: {
         fontSize: 18,
@@ -45,7 +54,8 @@ const styles = StyleSheet.create({
         fontWeight: 'bold'
     },
     subtitle: {
-        color: 'white',
+        color: 'black',
+        fontSize: 12
     }
 });
 

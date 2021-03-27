@@ -1,12 +1,14 @@
 
 import React, { useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { HelperText, Button, TextInput, DataTable } from 'react-native-paper';
+import { View, Text, StyleSheet, Alert } from 'react-native';
+import { HelperText, Button, TextInput } from 'react-native-paper';
 import 'react-native-get-random-values'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { nanoid } from 'nanoid'
+import { ThemeProvider } from '@react-navigation/native';
 
-const theme = { colors: { primary: '#ffaa42' } };
+const primaryColor = '#ffaa42';
+const theme = { colors: { primary: primaryColor } };
 
 const AddScreen = ({ navigation }) => {
     const [foodName, setFoodName] = useState('');
@@ -22,13 +24,25 @@ const AddScreen = ({ navigation }) => {
         setRecipes(input);
     }
 
+    const showErrorAlert = () =>
+    Alert.alert(
+      "",
+      "Something went wrong...",
+      [
+        { text: "OK" },
+      ], {
+      cancelable: true,
+    }
+    );
+
     const [saving, setSaving] = useState(false);
     const handleSave = async () => {
         setSaving(true);
-        const data = {};
-        data.id = nanoid();
-        data.name = foodName;
-        data.recipes = recipes;
+        const data = {
+            id: nanoid(),
+            name: foodName,
+            recipes: recipes
+        };
 
         try {
             const jsonValue = JSON.stringify(data)
@@ -37,6 +51,7 @@ const AddScreen = ({ navigation }) => {
             navigation.navigate('Home');
         } catch (e) {
             // save error
+            showErrorAlert();
             console.log(e.toString())
         }
     };
@@ -48,8 +63,7 @@ return (
             value={foodName}
             onChangeText={handleFoodNameChange}
             mode="outlined"
-            theme={{ colors: { primary: '#ffaa42' } }}
-
+            theme={theme}
         />
         <HelperText type="error" visible={foodName && foodNameHasError()}>
             Food name is invalid!
@@ -87,7 +101,9 @@ const styles = StyleSheet.create({
         padding: 8
     },
     saveButton: {
-        margin: 10
+        marginLeft: 5,
+        marginRight: 5,
+        marginTop: 10
     }
 });
 
