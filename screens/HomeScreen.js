@@ -1,25 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { RefreshControl, FlatList, View, Text, StyleSheet, ScrollView, TouchableHighlight } from 'react-native';
-import { Button, TextInput, FAB } from 'react-native-paper';
+import { FlatList, View, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { FAB } from 'react-native-paper';
 import { Alert } from 'react-native';
-import Card from './FoodCard';
 import FoodCard from './FoodCard';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { showErrorAlert, primaryColor } from '../StaticVariables';
 
 const HomeScreen = ({ navigation }) => {
 
   const [refreshing, setRefeshing] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [data, setData] = useState([]);
-
-  const renderItem = ({ item }) => (
-    <FoodCard id={item.id} name={item.name} recipes={item.recipes} navigate={navigation.navigate} />
-  );
 
   const handleRefresh = async () => {
     setRefeshing(true);
     getData();
   };
+
+  const renderItem = ({ item }) => (
+    <FoodCard id={item.id} name={item.name} recipes={item.recipes} navigate={navigation.navigate} />
+  );
 
   const getData = async () => {
     try {
@@ -32,10 +33,12 @@ const HomeScreen = ({ navigation }) => {
           });
           setData(storedData);
           setRefeshing(false);
+          setLoading(false);
         }
       }
       else {
         setRefeshing(false);
+        setLoading(false);
         setData([]);
       }
     } catch (e) {
@@ -55,17 +58,6 @@ const HomeScreen = ({ navigation }) => {
       showErrorAlert();
     }
   };
-
-  const showErrorAlert = () =>
-    Alert.alert(
-      "",
-      "Something went wrong...",
-      [
-        { text: "OK" },
-      ], {
-      cancelable: true,
-    }
-    );
 
   const showRemoveAlert = () =>
     Alert.alert(
@@ -89,18 +81,20 @@ const HomeScreen = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       {
-        data.length > 0 ? (
-          <View>
-            <FlatList
-              data={data}
-              renderItem={renderItem}
-              keyExtractor={item => item.id}
-              refreshing={refreshing}
-              onRefresh={handleRefresh}
-              horizontal={true}
-            />
-          </View>
-        ) : <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#666666' }}>No recipes...</Text>
+        !loading ?
+          data.length > 0 ? (
+            <View>
+              <FlatList
+                data={data}
+                renderItem={renderItem}
+                keyExtractor={item => item.id}
+                refreshing={refreshing}
+                onRefresh={handleRefresh}
+                horizontal={true}
+              />
+            </View>
+          ) : <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#666666' }}>No recipes...</Text>
+          : <ActivityIndicator size="large" color={primaryColor} animating={loading} />
       }
 
       <FAB

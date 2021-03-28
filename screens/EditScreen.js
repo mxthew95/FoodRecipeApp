@@ -1,17 +1,18 @@
 
 import React, { useState, useEffect } from 'react';
-import { ActivityIndicator, View, Text, StyleSheet, Alert } from 'react-native';
+import { ActivityIndicator, View, StyleSheet, Alert } from 'react-native';
 import { HelperText, Button, TextInput } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-const primaryColor = '#ffaa42';
-const theme = { colors: { primary: primaryColor } };
+import { theme, primaryColor, showErrorAlert } from '../StaticVariables';
 
 const EditScreen = ({ navigation, route }) => {
     const { foodID } = route.params;
     const [loading, setLoading] = useState(true);
-
     const [foodName, setFoodName] = useState('');
+    const [recipes, setRecipes] = useState('');
+    const [saving, setSaving] = useState(false);
+    const [removing, setRemoving] = useState(false);
+
     const handleFoodNameChange = (input) => {
         setFoodName(input);
     }
@@ -20,17 +21,50 @@ const EditScreen = ({ navigation, route }) => {
         return foodName.match(/^[a-zA-Z ]*$/) === null;
     };
 
-    const [recipes, setRecipes] = useState('');
     const handleRecipesChange = (input) => {
         setRecipes(input);
     }
 
-    const showErrorAlert = () =>
+    const handleSave = async () => {
+        setSaving(true);
+        const data = {
+            id: foodID,
+            name: foodName,
+            recipes: recipes
+        };
+
+        try {
+            const jsonValue = JSON.stringify(data);
+            await AsyncStorage.setItem(foodID, jsonValue);
+            setSaving(false);
+            navigation.navigate('Home');
+        } catch (e) {
+            // save error
+            showErrorAlert();
+            console.log(e.toString())
+        }
+    };
+
+    const handleRemove = async () => {
+        try {
+            setRemoving(true);
+            await AsyncStorage.removeItem(foodID);
+            setRemoving(false);
+            navigation.navigate('Home');
+        } catch (e) {
+            // remove error
+            showErrorAlert();
+            console.log(e.toString())
+        }
+    }
+
+    const showRemoveAlert = () =>
         Alert.alert(
-            "",
-            "Something went wrong...",
+            `Remove ${foodName}`,
+            `Are you sure you want to remove ${foodName}?`,
             [
-                { text: "OK" },
+                { text: "Cancel" },
+                { text: "Remove", onPress: handleRemove }
             ], {
             cancelable: true,
         }
@@ -51,54 +85,6 @@ const EditScreen = ({ navigation, route }) => {
         }
     };
 
-    const [saving, setSaving] = useState(false);
-    const handleSave = async () => {
-        setSaving(true);
-        const data = {
-            id: foodID,
-            name: foodName,
-            recipes: recipes
-        };
-
-        try {
-            const jsonValue = JSON.stringify(data);
-            await AsyncStorage.setItem(foodID, jsonValue);
-            setSaving(false);
-            navigation.navigate('Home');
-        } catch (e) {
-            // save error
-            showErrorAlert();
-            console.log(e.toString())
-        }
-
-    };
-
-    const showRemoveAlert = () =>
-    Alert.alert(
-      `Remove ${foodName}`,
-      `Are you sure you want to remove ${foodName}?`,
-      [
-        { text: "Cancel" },
-        { text: "Remove", onPress: handleRemove }
-      ], {
-      cancelable: true,
-    }
-    );
-
-    const [removing, setRemoving] = useState(false);
-    const handleRemove = async () => {
-        try {
-            setRemoving(true);
-            await AsyncStorage.removeItem(foodID);
-            setRemoving(false);
-            navigation.navigate('Home');
-        } catch (e) {
-            // remove error
-            showErrorAlert();
-            console.log(e.toString())
-        }
-    }
-
     useEffect(() => {
         const unsubscribe = navigation.addListener('focus', () => {
             getData();
@@ -117,7 +103,6 @@ const EditScreen = ({ navigation, route }) => {
                             onChangeText={handleFoodNameChange}
                             mode="outlined"
                             theme={theme}
-
                         />
                         <HelperText type="error" visible={foodName && foodNameHasError()}>
                             Food name is invalid!
